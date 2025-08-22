@@ -1,0 +1,52 @@
+services:
+  db:
+    image: postgres:15
+    container_name: mobs2-db
+    restart: always
+    environment:
+      POSTGRES_USER: mobs2_user
+      POSTGRES_PASSWORD: mobs2_pass
+      POSTGRES_DB: mobs2_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  laravel:
+    build: ./backend-laravel
+    container_name: mobs2-laravel
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: mobs2_db
+      DB_USERNAME: mobs2_user
+      DB_PASSWORD: mobs2_pass
+
+  nest:
+    build: ./backend-nest/telemetry-service
+    container_name: mobs2-nest
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+
+  vue:
+    build: ./frontend-vue/mobs
+    container_name: mobs2-vue
+    ports:
+      - "8080:5173" 
+    depends_on:
+      - laravel
+      - nest 
+
+volumes:
+  postgres_data:
+
+
+
+
